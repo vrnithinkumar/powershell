@@ -49,17 +49,28 @@ if ($result -eq [System.Windows.Forms.DialogResult]::OK)
 {
     $x = $textBox.Text
     $res = $x -match "'.*'"
+    Write-Output("`n")
     Write-Output("Ditching these DLL's `n================================")
     Foreach($val in $Matches.values)
     {
         Write-Output("Dll : $val")
     }
+
     Write-Output("`n")
 
     Foreach($val in $Matches.values)
     {
         $pathToDll = $val.Replace("'","")
-        rm -Force $pathToDll
-        Write-Output("Deleted : $pathToDll")
+
+        if (Test-Path $$pathToDll) 
+        {
+            rm -Force $pathToDll
+            Write-Output("Deleted : $pathToDll")
+        }
+        else 
+        {
+            Write-Warning(" File not exist: $pathToDll")
+        }
+        Write-Output("`n")
     }
 }
