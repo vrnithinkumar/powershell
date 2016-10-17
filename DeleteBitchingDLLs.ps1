@@ -64,12 +64,12 @@ if ($result -eq [System.Windows.Forms.DialogResult]::OK)
 
         if (Test-Path $$pathToDll) 
         {
-            rm -Force $pathToDll
-            Write-Output("Deleted : $pathToDll")
+            Write-Warning(" File not exist: $pathToDll")
         }
         else 
         {
-            Write-Warning(" File not exist: $pathToDll")
+            rm -Force $pathToDll
+            Write-Output("Deleted : $pathToDll")
         }
         Write-Output("`n")
     }
