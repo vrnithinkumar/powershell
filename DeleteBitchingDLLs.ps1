@@ -42,35 +42,64 @@ $form.Controls.Add($textBox)
 $form.Topmost = $True
 
 $form.Add_Shown({$textBox.Select()})
-$result = $form.ShowDialog()
+$result = $form.ShowDialog() 
 # Form stuf ending.
+
+#Function parse.
+function BeepNTimes{	
+	param(
+ 		[parameter(Mandatory=$true)]            
+ 		[String]$errorMessage
+	)
+    $errorMessageInSingleLine = $errorMessage.replace("`n",", ").replace("`r",", ")
+	$arrayOfDlls = New-Object string[]
+    $dllIndex = 0
+    Foreach ($c in errorMessageInSingleLine)
+    {
+       if($c -eq '')
+       {
+           
+       }
+    }
+}
 
 if ($result -eq [System.Windows.Forms.DialogResult]::OK)
 {
-    $x = $textBox.Text
-    $res = $x -match "'.*'"
+    $errorMessage = $textBox.Text.replace("`n","").replace("`r","")
+    $singleQuotes = ([regex]"'[^']*'").Matches($errorMessage);
+    $validValues = $singleQuotes | where{$_.value -like "*.dll"}
     Write-Output("`n")
     Write-Output("Ditching these DLL's `n================================")
-    Foreach($val in $Matches.values)
+    for($i =0 ; $i -lt $singleQuotes.Count;$i++)
     {
-        Write-Output("Dll : $val")
+         Write-Output("Dll : $($singleQuotes[$i])")
     }
+   
 
     Write-Output("`n")
-
-    Foreach($val in $Matches.values)
+    $deleted = 0
+    Foreach($val in $singleQuotes)
     {
-        $pathToDll = $val.Replace("'","")
+        $pathToDll = $val.Value.Replace("'","")
 
-        if (Test-Path $$pathToDll) 
+        if (-not (Test-Path $pathToDll))
         {
-            Write-Warning(" File not exist: $pathToDll")
+            Write-Host "Error-DBD1 : File not exist or not a dll: $pathToDll `n" -ForegroundColor Red -BackgroundColor black
         }
-        else 
+        else
         {
-            rm -Force $pathToDll
-            Write-Output("Deleted : $pathToDll")
+            $rmResult = rm -Force $pathToDll > null
+            if($?)
+            {
+                Write-Host "Deleted : $pathToDll `n" -ForegroundColor Green -BackgroundColor black
+                $deleted += 1
+            }
+            else 
+            {
+                Write-Host "Error-DBD2 : Deletion failed : $pathToDll `n" -ForegroundColor Red -BackgroundColor black
+            }
         }
-        Write-Output("`n")
     }
+    
+    Write-Host "Deleted $deleted out of $($singleQuotes.Count) Bitching Dlls `n" -ForegroundColor Magenta -BackgroundColor black
 }
